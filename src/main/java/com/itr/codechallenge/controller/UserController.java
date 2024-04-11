@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -49,8 +50,56 @@ public class UserController {
             }
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
 
+    @PostMapping("/user/{user_id}")
+    public ResponseEntity<String> getUser(@PathVariable("id") Long id) {
+        try {
+            Optional<User> user = userRepository.findById(id);
+            return user.map(value -> new ResponseEntity<>(value.toString(), HttpStatus.OK))
+                    .orElseGet(() -> new ResponseEntity<>("No se encontró el usuario", HttpStatus.OK));
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
+    @PutMapping("/update-user/{id}")
+    public ResponseEntity<String> updateUser(@PathVariable("id") Long id, @RequestBody User userToUpdate) {
+        try {
+            if (!Utils.emailValidation(userToUpdate.getEmail())) {
+                return new ResponseEntity<>("El correo no es válido", HttpStatus.BAD_REQUEST);
+            }
+
+            if (Utils.passwordValidation(userToUpdate.getPassword())) {
+                return new ResponseEntity<>("El password no cumple la validación", HttpStatus.BAD_REQUEST);
+            }
+            Optional<User> user = userRepository.findById(id);
+            user.map(userFound -> {
+                        userFound.setModified(new Date());
+                        userFound.setIs_active(Boolean.TRUE);
+                        userFound.setToken(UUID.randomUUID());
+                        User userUpdated = userRepository.save(userFound);
+                        return new ResponseEntity<>(userUpdated.toString(), HttpStatus.OK);
+                    })
+                    .orElseGet(() -> new ResponseEntity<>("No se encontró el usuario", HttpStatus.OK));
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return null;
+    }
+
+    @DeleteMapping("/delete-user/{user_id}")
+    public ResponseEntity<String> deleteUser(@PathVariable("id") Long id) {
+        try {
+            Optional<User> user = userRepository.findById(id);
+            return user.map(value ->{
+                        userRepository.delete(value);
+                        return new ResponseEntity<>("usuario eleminado", HttpStatus.OK);
+                    })
+                    .orElseGet(() -> new ResponseEntity<>("No se encontró el usuario", HttpStatus.OK));
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }
