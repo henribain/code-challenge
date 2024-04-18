@@ -6,10 +6,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.GenericGenerator;
 import org.w3c.dom.stylesheets.LinkStyle;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name="Users", indexes = @Index(name = "uniqueIndex", columnList = "email", unique = true))
@@ -29,15 +26,21 @@ public class User {
     private String email;
     @Column(name = "password")
     private String password;
+    @Column(name = "username")
+    private String username;
     @Column(name = "created")
     private Date created;
     @Column(name = "modified")
     private Date modified;
     @Column(name = "is_active")
     private Boolean is_active;
-
     @Column(name = "token")
     private UUID token;
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(  name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user",
             cascade = {
                     CascadeType.MERGE,
@@ -46,6 +49,10 @@ public class User {
             })
     private List<Phone> phones;
 
-
+    public User(String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+    }
 }
 

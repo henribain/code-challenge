@@ -6,6 +6,21 @@ Las instrucciones basicamente son:
 
     1.Correr la clase 'CodechallengeApplication.java'
     2.Una vez corriendo la aplicación, podes ir al siguiente link -> http://localhost:3000/h2-ui
-    3.Loguearse en la interface de h2
-    4.Abrir postman y consultar: http://localhost:3000/api/v1/add-user como POST
-    5.Se adjunta la collection de postman para importar para realizar la creación -> challenge.postman_collection.json
+    3.Loguearse en la interface de h2 usando la db -> jdbc:h2:mem:challenge
+
+## Swagger
+Una vez levantado el ambiente podemos usar swagger en la siguiente url
+
+ - http://localhost:3000/swagger-ui/index.html#/User/
+
+#### Autenticacion con swagger
+una vez en la ui de swagger, podemos hacer un signup, y luego un signin para obtener el token e ingresarlo en las request que tienen el 
+candado de authorize
+
+### Roles - creación
+
+    podemos correr el siguiente script en la UI de h2
+    
+    INSERT INTO roles(name) VALUES('ROLE_USER');
+    INSERT INTO roles(name) VALUES('ROLE_MODERATOR');
+    INSERT INTO roles(name) VALUES('ROLE_ADMIN');
